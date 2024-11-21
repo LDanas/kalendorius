@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+select, .season-container {
+    margin: 20px 0;
+    padding: 10px;
+}
+
+.season-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px; /* Adds spacing between seasons */
+}
+
+.season-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%; /* Adjust width for the overall container */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.season-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.months-row {
+    display: flex;
+    justify-content: center;
+    gap: 280px; /* Space between each month box */
+}
+
+.month-box {
+    border: 1px solid #ddd;
+    width: 320px;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 70px;  /* Add 70px margin between the month boxes */
+}
+
+.holiday {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+}
+
+.month-box td {
+    visibility: hidden; /* Hide all dates initially */
+}
+
+.month-box td.holiday {
+    visibility: visible; /* Only show holiday dates */
+}
+
+
+.month-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.month-box th, .month-box td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.holiday {
+    background-color: red;
+    color: white;
+    cursor: pointer;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 300px;
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.popup.fade-in {
+    animation: fadeIn 0.5s forwards;
+}
+
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        visibility: visible;
+    }
+}

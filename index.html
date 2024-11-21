@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calendar 2025</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Interactive Calendar for 2025</h1>
+    <select id="countrySelect" onchange="fetchCalendar()">
+        <option value="">Select a country</option>
+        <!-- Country list will be dynamically generated here -->
+    </select>
+
+    <div id="seasons" class="season-container">
+        <!-- Season containers will be dynamically generated here -->
+    </div>
+
+    <!-- Pop-up for holiday/event description -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span class="popup-close" onclick="closePopup()">&#10006;</span>
+            <p id="popup-description"></p>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'Co86TCPY55zGI0f4Kv5l3YMcc07u99Bk';
+        const countries = [
+            'US', 'DE', 'LT', 'FR', 'IT', 'GB', 'IN', 'JP', 'CN', 'BR', 'RU', 'AU', 'ZA', 'ES', 'CA', 'MX', 'NL', 'SE', 'PL', 'GR', 'PT', 'DK', 'NO', 'FI', 'IE', 'BE'
+            // Add more country codes as needed
+        ];
+
+        // Dynamically populate the country select dropdown
+        function populateCountryList() {
+            const countrySelect = document.getElementById('countrySelect');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country; // You might want to translate this to country names
+                countrySelect.appendChild(option);
+            });
+        }
+
+        // Fetch holidays and events for the selected country in 2025
+        async function fetchCalendar() {
+            const country = document.getElementById('countrySelect').value;
+            if (!country) return;
+
+            const response = await fetch(`https://calendarific.com/api/v2/holidays?api_key=${apiKey}&country=${country}&year=2025`);
+            const data = await response.json();
+            populateSeasons(data.response.holidays);
+        }
+
+        // Generate the season containers with months
+        function populateSeasons(holidays) {
+            const seasonsContainer = document.getElementById('seasons');
+            seasonsContainer.innerHTML = ''; // Clear existing season containers
+
+            const seasons = [
+                { name: 'Spring', months: ['March', 'April', 'May'] },
+                { name: 'Summer', months: ['June', 'July', 'August'] },
+                { name: 'Fall', months: ['September', 'October', 'November'] },
+                { name: 'Winter', months: ['December', 'January', 'February'] }
+            ];
+
+            seasons.forEach(season => {
+                const seasonBox = document.createElement('div');
+                seasonBox.classList.add('season-box');
+
+                const seasonTitle = document.createElement('h3');
+                seasonTitle.classList.add('season-title');
+                seasonTitle.textContent = season.name;
+                seasonBox.appendChild(seasonTitle);
+
+                const monthsRow = document.createElement('div');
+                monthsRow.classList.add('months-row');
+
+                season.months.forEach((month, index) => {
+                    const monthBox = document.createElement('div');
+                    monthBox.classList.add('month-box');
+                    monthBox.setAttribute('data-month', index);
+
+                    // Create the month name heading
+                    const monthHeading = document.createElement('h4');
+                    monthHeading.textContent = month;
+                    monthBox.appendChild(monthHeading);
+
+                    const table = document.createElement('table');
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement('tbody');
+                    let firstDay = new Date(2025, index + (season.name === 'Spring' ? 2 : season.name === 'Summer' ? 5 : season.name === 'Fall' ? 8 : 11), 1).getDay(); // Get the first day of the month
+                    firstDay = firstDay === 0 ? 7 : firstDay; // Adjust for Sunday (0) to be treated as 7
+
+                    let currentDay = 1;
+                    for (let i = 0; i < 6; i++) { // Up to 6 rows (weeks)
+                        const row = document.createElement('tr');
+                        for (let j = 1; j <= 7; j++) {
+                            const cell = document.createElement('td');
+                            if (i === 0 && j < firstDay) {
+                                cell.textContent = ''; // Empty cells before the start of the month
+                            } else if (currentDay <= 31) { // Assuming all months have 31 days max
+                                const date = currentDay++;
+                                cell.textContent = date;
+
+                                const formattedDate = `${2025}-${index + 1 + (season.name === 'Spring' ? 2 : season.name === 'Summer' ? 5 : season.name === 'Fall' ? 8 : 11)}-${date < 10 ? '0' + date : date}`;
+                                const holiday = holidays.find(holiday => holiday.date.iso === formattedDate);
+
+                                if (holiday) {
+                                    cell.classList.add('holiday');
+                                    cell.title = holiday.name;
+
+                                    // Add click event for showing popup
+                                    cell.onclick = () => showPopup(holiday.name);
+                                } else {
+                                    cell.classList.add('hidden'); // Hide non-holidays
+                                }
+                            }
+                            row.appendChild(cell);
+                        }
+                        tbody.appendChild(row);
+                        if (currentDay > 31) break;
+                    }
+
+                    table.appendChild(tbody);
+                    monthBox.appendChild(table);
+                    monthsRow.appendChild(monthBox);
+                });
+
+                seasonBox.appendChild(monthsRow);
+                seasonsContainer.appendChild(seasonBox);
+            });
+        }
+
+        // Show pop-up with event/holiday description
+        function showPopup(description) {
+            const popup = document.getElementById('popup');
+            const popupDescription = document.getElementById('popup-description');
+            popupDescription.textContent = description;
+            popup.style.display = 'block'; // Show the popup
+            popup.classList.add('fade-in'); // Add fade-in animation
+        }
+
+        // Close the pop-up
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none'; // Hide the popup
+            popup.classList.remove('fade-in'); // Remove fade-in class
+        }
+
+        // Initialize page
+        populateCountryList();
+    </script>
+</body>
+</html>
